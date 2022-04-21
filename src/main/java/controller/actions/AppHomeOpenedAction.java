@@ -4,6 +4,7 @@ import backend.DataRepository;
 import com.slack.api.model.view.View;
 import frontend.CleanupCoordinator;
 import frontend.SlackInterface;
+import util.Log;
 
 import static com.slack.api.model.block.Blocks.*;
 import static com.slack.api.model.block.composition.BlockCompositions.markdownText;
@@ -19,12 +20,32 @@ public class AppHomeOpenedAction extends ActionRunner.Action {
 
     @Override
     protected void run(DataRepository dataRepository, SlackInterface slackInterface) {
+        if (dataRepository.isInvalidUserId(userId)) {
+            slackInterface.publishView(userId, getInvalidUserIdView());
+            Log.e(String.format("Unknown User Accessed the Home Screen. userId: %s", userId), null);
+            return;
+        }
+
         var completedHours = dataRepository.getCleanupHours(userId);
         if (CleanupCoordinator.isHouseManagerId(userId)) {
             slackInterface.publishView(userId, getHouseManagerView());
         } else {
             slackInterface.publishView(userId, getUserView(completedHours));
         }
+    }
+
+    private View getInvalidUserIdView() {
+        return view(view -> view
+                        .type("home")
+                        .blocks(asBlocks(
+                                section(section -> section.text(markdownText(mt -> mt.text("*YOUR ID IS NOT IN THE SYSTEM!!! Please Contact the Housing manager.*"))))
+//                        actions(actions -> actions
+//                                .elements(asElements(
+//                                        button(b -> b.text(plainText(pt -> pt.text("Click me!"))).value("button1").actionId("button_1"))
+//                                ))
+//                        )
+                        ))
+        );
     }
 
     private View getUserView(int completedHours) {

@@ -13,10 +13,13 @@ public class DataRepository {
     public DataRepository() {
         googleSheetsDataSource = new GoogleSheetsDataSource();
         userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
-        System.out.println(userIdToNameMap);
     }
 
     public int getCleanupHours(String userId) {
         return new Random().nextInt(5);
+    }
+
+    public boolean isInvalidUserId(String userId) {
+        return !userIdToNameMap.containsKey(userId);
     }
 }
