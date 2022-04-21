@@ -6,14 +6,18 @@ import com.slack.api.bolt.socket_mode.SocketModeApp;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import controller.CleanupCoordinatorController;
 
+import java.util.Objects;
+
 public class CleanupCoordinator {
 
 
     private final App app;
     private final SocketModeApp socketModeApp;
     private final CleanupCoordinatorController controller;
+    private static String houseManagerId;
 
-    public CleanupCoordinator(String botToken, String appToken) throws Exception {
+    public CleanupCoordinator(String botToken, String appToken, String houseManagerId) throws Exception {
+        CleanupCoordinator.houseManagerId = houseManagerId;
         var appConfig = AppConfig.builder().singleTeamBotToken(botToken).build();
         app = new App(appConfig);
         socketModeApp = new SocketModeApp(appToken, app);
@@ -42,5 +46,11 @@ public class CleanupCoordinator {
 
     public void start() throws Exception {
         socketModeApp.start();
+    }
+
+    public static boolean isHouseManagerId(String userId) {
+        return Objects.requireNonNullElse(userId, "null").equals(
+                Objects.requireNonNullElse(houseManagerId, "missing")
+        );
     }
 }
