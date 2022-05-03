@@ -1,16 +1,14 @@
 import frontend.CleanupCoordinator;
-import io.github.cdimascio.dotenv.Dotenv;
+import util.Constants;
 
 public class SlackCleanupCoordinatorApp {
 
     public static void main(String[] args) throws Exception {
-        var dotenv = Dotenv.load();
-        String botToken = dotenv.get("SLACK_BOT_TOKEN");
-        String appToken = dotenv.get("SLACK_APP_TOKEN");
-        String houseManagerId = dotenv.get("HOUSE_MANAGER_ID");
+        Constants.init();
 
-        var cleanupCoordinator = new CleanupCoordinator(botToken, appToken, houseManagerId);
+        var cleanupCoordinator = new CleanupCoordinator();
         cleanupCoordinator.start();
+
     }
 
 }

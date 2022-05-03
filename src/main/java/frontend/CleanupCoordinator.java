@@ -5,8 +5,8 @@ import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.socket_mode.SocketModeApp;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import controller.CleanupCoordinatorController;
-
-import java.util.Objects;
+import util.Constants;
+import util.Log;
 
 public class CleanupCoordinator {
 
@@ -14,18 +14,25 @@ public class CleanupCoordinator {
     private final App app;
     private final SocketModeApp socketModeApp;
     private final CleanupCoordinatorController controller;
-    private static String houseManagerId;
 
-    public CleanupCoordinator(String botToken, String appToken, String houseManagerId) throws Exception {
-        CleanupCoordinator.houseManagerId = houseManagerId;
-        var appConfig = AppConfig.builder().singleTeamBotToken(botToken).build();
+    public CleanupCoordinator() throws Exception {
+        var appConfig = AppConfig.builder().singleTeamBotToken(Constants.getBotToken()).build();
         app = new App(appConfig);
-        socketModeApp = new SocketModeApp(appToken, app);
+        socketModeApp = new SocketModeApp(Constants.getAppToken(), app);
 
         setupListeners();
 
-        var slackInterface = new SlackInterface(botToken);
+        var slackInterface = new SlackInterface(Constants.getBotToken());
+        Log.setSlackInterface(slackInterface); //Must be before the next one
         controller = new CleanupCoordinatorController(slackInterface);
+    }
+
+    public static boolean isHouseManagerId(String userId) {
+        return Constants.getHouseManagerIds().contains(userId);
+    }
+
+    public void start() throws Exception {
+        socketModeApp.start();
     }
 
     private void setupListeners() {
@@ -33,24 +40,40 @@ public class CleanupCoordinator {
             return ctx.ack(":wave: Hello!");
         });
 
-        app.message("hi", (payload, ctx) -> {
-            controller.handleHiCommand(payload);
+        app.message("no balls", (payload, ctx) -> {
+            controller.handleNoBallsEvent(payload);
             return ctx.ack();
         });
 
         app.event(AppHomeOpenedEvent.class, (payload, ctx) -> {
-            controller.handleAppHomeOpenedEvent(payload);
+            var userId = payload.getEvent().getUser();
+            controller.handleAppHomeOpenedEvent(userId);
             return ctx.ack();
         });
-    }
 
-    public void start() throws Exception {
-        socketModeApp.start();
-    }
+        app.blockAction("assign_hours_btn", (req, ctx) -> {
+            controller.handleAssignHoursEvent();
+            return ctx.ack();
+        });
 
-    public static boolean isHouseManagerId(String userId) {
-        return Objects.requireNonNullElse(userId, "null").equals(
-                Objects.requireNonNullElse(houseManagerId, "missing")
-        );
+        app.blockAction("reload_sheets_data_btn", (req, ctx) -> {
+            controller.handleReloadSheetsDataEvent();
+            return ctx.ack();
+        });
+
+        app.blockAction("accept_hour_btn", (req, ctx) -> {
+            var userId = ctx.getRequestUserId();
+            var assignmentId = req.getPayload().getActions().get(0).getValue();
+            var message = req.getPayload().getMessage();
+            controller.handleAcceptHourEvent(userId, assignmentId, message);
+            return ctx.ack();
+        });
+
+        app.blockAction("skip_hour_btn", (req, ctx) -> {
+            var userId = ctx.getRequestUserId();
+            var assignmentId = req.getPayload().getActions().get(1).getValue();
+            controller.handleSkipHourEvent(userId, assignmentId);
+            return ctx.ack();
+        });
     }
 }

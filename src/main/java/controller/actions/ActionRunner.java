@@ -1,13 +1,13 @@
 package controller.actions;
 
-import backend.DataRepository;
+import backend.DataRepositoryInterface;
 import frontend.SlackInterface;
 
 public class ActionRunner {
-    protected DataRepository dataRepository;
+    protected DataRepositoryInterface dataRepository;
     protected SlackInterface slackInterface;
 
-    public ActionRunner(DataRepository dataRepository, SlackInterface slackInterface) {
+    public ActionRunner(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
         this.dataRepository = dataRepository;
         this.slackInterface = slackInterface;
     }
@@ -16,15 +16,21 @@ public class ActionRunner {
         action.run(dataRepository, slackInterface);
     }
 
-    public abstract static class Action {
+    public abstract static class UserAction extends Action {
 
         protected final String userId;
 
-        public Action(String userId) {
+        public UserAction(String userId) {
             this.userId = userId;
         }
+    }
 
-        protected abstract void run(DataRepository dataRepository, SlackInterface slackInterface);
+    public abstract static class Action {
+
+        public Action() {
+        }
+
+        protected abstract void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface);
     }
 
 }

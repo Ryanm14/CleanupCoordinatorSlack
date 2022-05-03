@@ -1,5 +1,7 @@
 package backend.sheets;
 
+import backend.sheets.response.Result;
+import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -13,19 +15,21 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import util.Constants;
 import util.Log;
+import util.Util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GoogleSheetsDataSource {
-    private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
+    private static final String APPLICATION_NAME = "Google Sheets API Cleanup Coordinator";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
@@ -37,7 +41,6 @@ public class GoogleSheetsDataSource {
     private static final String CREDENTIALS_FILE_PATH = "./credentials.json";
 
     private Sheets service;
-
 
     public GoogleSheetsDataSource() {
         // Build a new authorized API client service.
@@ -74,34 +77,49 @@ public class GoogleSheetsDataSource {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public Map<String, String> getSlackUserToName() {
-        final String spreadsheetId = "1ti3i-ERUroWlEt_rc8k0kb1uC4DVY8FhiYCENy1any4";
-        final String range = "Members!A2:B";
-
-        ValueRange response;
+    public Result<Map<String, String>> getSlackUserToName() {
         try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, range)
-                    .execute();
-        } catch (IOException e) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> map = new HashMap<>();
-
-        List<List<Object>> values = response.getValues();
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-        } else {
-            for (List<Object> row : values) {
-                // Print columns A and E, which correspond to indices 0 and 4.
-                System.out.printf("%s, %s\n", row.get(0), row.get(1));
-                String userId = row.get(0).toString();
-                String name = row.get(1).toString();
-                map.put(userId, name);
+            ValueRange response = getValueRange(Constants.getSheetsMemberRange());
+            if (response == null) {
+                return Result.error("Error getting values");
             }
+            return Result.ok(getMapFromUserToNameValues(response.getValues()));
+        } catch (IOException e) {
+            Log.e(e.getMessage(), e);
+            return Result.error(e.getMessage());
         }
+    }
 
-        return map;
+    private ValueRange getValueRange(String range) throws IOException {
+        return service.spreadsheets().values()
+                .get(Constants.getSheetsFile(), range)
+                .execute();
+    }
+
+    private Map<String, String> getMapFromUserToNameValues(List<List<Object>> values) {
+        return values.stream()
+                .collect(Collectors.toMap(
+                        row -> row.get(1).toString(), //Slack User ID
+                        row -> row.get(0).toString() //Name
+                ));
+    }
+
+    public Result<List<TotalHoursSheetsModel>> getTotalHours() {
+        try {
+            ValueRange response = getValueRange(Constants.getSheetsTotalHoursRange());
+            return Result.ok(getTotalHoursFromValues(response.getValues()));
+        } catch (IOException e) {
+            Log.e(e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    private List<TotalHoursSheetsModel> getTotalHoursFromValues(List<List<Object>> values) {
+        return values.stream().map(row -> {
+            var name = row.get(0).toString();
+            var completedHours = Util.parseIntSafely(row.get(1).toString());
+            var requiredHours = Util.parseIntSafely(row.get(2).toString());
+            return new TotalHoursSheetsModel(name, completedHours, requiredHours);
+        }).collect(Collectors.toList());
     }
 }
