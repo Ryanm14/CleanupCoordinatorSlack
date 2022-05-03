@@ -38,7 +38,7 @@ public class DataRepository implements DataRepositoryInterface {
         }
 
         var keys = googleSheetsDataSource.getKeys();
-        Constants.setKeys(keys);
+        Constants.setSettings(keys);
     }
 
     private void reloadDataFromSheets() {
