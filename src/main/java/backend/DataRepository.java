@@ -2,7 +2,6 @@ package backend;
 
 import backend.sheets.CleanupCoordinatorSheetsAPI;
 import backend.sheets.CleanupCoordinatorSheetsDataSource;
-import backend.sheets.response.Result;
 import backend.sheets.response.TotalHoursSheetsModel;
 import util.Constants;
 import util.Log;
@@ -49,15 +48,6 @@ public class DataRepository implements DataRepositoryInterface {
         userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
         nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         totalHoursList = googleSheetsDataSource.getTotalHours();
-    }
-
-    private <T> T loadData(Result<T> result, T defaultValue) {
-        if (result.isOk()) {
-            return result.getValue();
-        } else {
-            Log.e(result.getError());
-        }
-        return defaultValue;
     }
 
     @Override
