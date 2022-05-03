@@ -3,15 +3,10 @@ package controller.actions;
 import backend.DataRepositoryInterface;
 import backend.models.Assignment;
 import frontend.SlackInterface;
+import frontend.views.AssignCleanupHourMessageBlocks;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.slack.api.model.block.Blocks.*;
-import static com.slack.api.model.block.composition.BlockCompositions.markdownText;
-import static com.slack.api.model.block.composition.BlockCompositions.plainText;
-import static com.slack.api.model.block.element.BlockElements.asElements;
-import static com.slack.api.model.block.element.BlockElements.button;
 
 public class AssignCleanupHours extends ActionRunner.Action {
 
@@ -42,24 +37,8 @@ public class AssignCleanupHours extends ActionRunner.Action {
 //        )
         var assignmentId = UUID.randomUUID().toString();
         var assignment = List.of(new Assignment()).get(0);
-        var blocks = asBlocks(
-                section(section -> section.text(markdownText(mt -> mt.text(String.format("*Howdy <@%s>! You have been assigned a cleanup hour for this week:*", userId))))),
-                divider(),
-                section(section -> section.text(markdownText(mt -> mt.text(getAssignmentMessageText(assignmentId, assignment))))),
-                actions(actions -> actions
-                        .elements(asElements(
-                                button(b -> b.text(plainText(pt -> pt.text("Accept Hour"))).value(assignmentId).actionId("accept_hour_btn")),
-                                button(b -> b.text(plainText(pt -> pt.text("Skip Hour"))).value(assignmentId).actionId("skip_hour_btn"))
-                        ))
-                ));
-        slackInterface.sendMessage(userId, "You have been assigned a cleanup hour for this week", blocks);
-    }
+        var blocks = AssignCleanupHourMessageBlocks.getBlocks(userId, assignmentId, assignment);
 
-    private String getAssignmentMessageText(String assignmentId, Assignment assignment) {
-        return String.format("*Assignment*: %s\n", assignment.getName()) +
-                String.format("Due Date: %s at %s\n", assignment.getDueDay(), assignment.getDueTime()) +
-                String.format("Worth: %d Hour\n", assignment.getWorth()) +
-                String.format("Link: %s\n", assignment.getLink()) +
-                String.format("Assignment ID: %s", assignmentId);
+        slackInterface.sendMessage(userId, "You have been assigned a cleanup hour for this week", blocks);
     }
 }

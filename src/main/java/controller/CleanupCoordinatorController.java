@@ -5,6 +5,7 @@ import com.slack.api.app_backend.events.payload.EventsApiPayload;
 import com.slack.api.model.Message;
 import com.slack.api.model.event.MessageEvent;
 import controller.actions.*;
+import controller.actions.AppHomeOpenedAction;
 import frontend.SlackInterface;
 
 public class CleanupCoordinatorController {
