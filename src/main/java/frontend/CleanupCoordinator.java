@@ -61,6 +61,11 @@ public class CleanupCoordinator {
             return ctx.ack();
         });
 
+        app.blockAction("reload_sheets_keys_btn", (req, ctx) -> {
+            controller.handleReloadSheetsKeyEvent();
+            return ctx.ack();
+        });
+
         app.blockAction("accept_hour_btn", (req, ctx) -> {
             var userId = ctx.getRequestUserId();
             var assignmentId = req.getPayload().getActions().get(0).getValue();

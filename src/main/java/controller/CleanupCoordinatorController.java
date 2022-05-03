@@ -39,4 +39,8 @@ public class CleanupCoordinatorController {
     public void handleSkipHourEvent(String userId, String assignmentId) {
 
     }
+
+    public void handleReloadSheetsKeyEvent() {
+        actionRunner.runAction(new ReloadSheetsKeysAction());
+    }
 }

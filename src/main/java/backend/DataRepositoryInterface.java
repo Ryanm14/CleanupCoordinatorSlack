@@ -10,4 +10,6 @@ public interface DataRepositoryInterface {
     TotalHoursSheetsModel getCleanupHours(String userId);
 
     Set<String> getUserIds();
+
+    void reloadKeys();
 }

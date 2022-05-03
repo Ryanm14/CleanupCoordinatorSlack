@@ -78,7 +78,8 @@ public class AppHomeOpenedAction extends ActionRunner.UserAction {
                         actions(actions -> actions
                                 .elements(asElements(
                                         button(b -> b.text(plainText(pt -> pt.text("Assign Hours"))).value("button1").actionId("assign_hours_btn")),
-                                        button(b -> b.text(plainText(pt -> pt.text("Reload Sheets Data"))).value("reloadDataBtn").actionId("reload_sheets_data_btn"))
+                                        button(b -> b.text(plainText(pt -> pt.text("Reload Sheets Data"))).value("reloadDataBtn").actionId("reload_sheets_data_btn")),
+                                        button(b -> b.text(plainText(pt -> pt.text("Reload Sheets Keys"))).value("reloadKeysBtn").actionId("reload_sheets_keys_btn"))
                                 ))
                         )
                 ))

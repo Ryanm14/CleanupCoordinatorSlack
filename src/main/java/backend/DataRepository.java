@@ -1,11 +1,12 @@
 package backend;
 
-import backend.sheets.GoogleSheetsDataSource;
+import backend.sheets.CleanupCoordinatorSheetsAPI;
+import backend.sheets.CleanupCoordinatorSheetsDataSource;
 import backend.sheets.response.Result;
 import backend.sheets.response.TotalHoursSheetsModel;
+import util.Constants;
 import util.Log;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,21 +14,41 @@ import java.util.stream.Collectors;
 
 public class DataRepository implements DataRepositoryInterface {
 
-    private final GoogleSheetsDataSource googleSheetsDataSource;
+    private CleanupCoordinatorSheetsDataSource googleSheetsDataSource;
     private Map<String, String> userIdToNameMap;
     private Map<String, String> nameToUserIdMap;
 
     private List<TotalHoursSheetsModel> totalHoursList;
 
     public DataRepository() {
-        googleSheetsDataSource = new GoogleSheetsDataSource();
-        reloadDataFromSheets();
+        try {
+            googleSheetsDataSource = new CleanupCoordinatorSheetsDataSource(new CleanupCoordinatorSheetsAPI());
+            reloadKeysFromSheets();
+            reloadDataFromSheets();
+        } catch (Exception e) {
+            Log.e(e.getMessage(), e);
+        }
+    }
+
+    private void reloadKeysFromSheets() {
+        if (googleSheetsDataSource == null) {
+            logGoogleSheetsNullError();
+            return;
+        }
+
+        var keys = googleSheetsDataSource.getKeys();
+        Constants.setKeys(keys);
     }
 
     private void reloadDataFromSheets() {
-        userIdToNameMap = loadData(googleSheetsDataSource.getSlackUserToName(), Collections.emptyMap());
+        if (googleSheetsDataSource == null) {
+            logGoogleSheetsNullError();
+            return;
+        }
+
+        userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
         nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-        totalHoursList = loadData(googleSheetsDataSource.getTotalHours(), Collections.emptyList());
+        totalHoursList = googleSheetsDataSource.getTotalHours();
     }
 
     private <T> T loadData(Result<T> result, T defaultValue) {
@@ -41,6 +62,11 @@ public class DataRepository implements DataRepositoryInterface {
 
     @Override
     public void reloadData() {
+        if (googleSheetsDataSource == null) {
+            logGoogleSheetsNullError();
+            return;
+        }
+
         reloadDataFromSheets();
     }
 
@@ -61,5 +87,14 @@ public class DataRepository implements DataRepositoryInterface {
     @Override
     public Set<String> getUserIds() {
         return userIdToNameMap.keySet();
+    }
+
+    @Override
+    public void reloadKeys() {
+        reloadKeysFromSheets();
+    }
+
+    private void logGoogleSheetsNullError() {
+        Log.e("Google Sheets is not initialized - check credentials.json file");
     }
 }

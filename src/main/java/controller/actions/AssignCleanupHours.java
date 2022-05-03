@@ -3,8 +3,8 @@ package controller.actions;
 import backend.DataRepositoryInterface;
 import backend.models.Assignment;
 import frontend.SlackInterface;
-import util.Constants;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.slack.api.model.block.Blocks.*;
@@ -41,7 +41,7 @@ public class AssignCleanupHours extends ActionRunner.Action {
 //                text="Pick a date for me to remind you"
 //        )
         var assignmentId = UUID.randomUUID().toString();
-        var assignment = Constants.getAssignments().get(0);
+        var assignment = List.of(new Assignment()).get(0);
         var blocks = asBlocks(
                 section(section -> section.text(markdownText(mt -> mt.text(String.format("*Howdy <@%s>! You have been assigned a cleanup hour for this week:*", userId))))),
                 divider(),
