@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 public class Constants {
     private static String SHEETS_DATA_FILE_ID_KEY = "";
     private static String HOUSE_MANAGER_KEY = "";
+
+    private static String SHEETS_CLEANUP_HOUR_RANGE_KEY = "";
+    private static String SHEETS_CLEANUP_HOUR_RANGE_KEY_DEFAULT = "";
     private static String SHEETS_MEMBERS_RANGE_KEY = "";
     private static String SHEETS_MEMBERS_RANGE_KEY_DEFAULT = "";
     private static String SHEETS_TOTAL_HOURS_RANGE_KEY = "";
@@ -43,6 +46,9 @@ public class Constants {
         SHEETS_DATA_FILE_ID_KEY = dotenv.get("SHEETS_DATA_FILE_ID_KEY");
 
         HOUSE_MANAGER_KEY = dotenv.get("HOUSE_MANAGER_KEY");
+
+        SHEETS_CLEANUP_HOUR_RANGE_KEY = dotenv.get("SHEETS_CLEANUP_HOUR_RANGE_KEY");
+        SHEETS_CLEANUP_HOUR_RANGE_KEY_DEFAULT = dotenv.get("SHEETS_CLEANUP_HOUR_RANGE_KEY_DEFAULT");
 
         SHEETS_MEMBERS_RANGE_KEY = dotenv.get("SHEETS_MEMBERS_RANGE_KEY");
         SHEETS_MEMBERS_RANGE_KEY_DEFAULT = dotenv.get("SHEETS_MEMBERS_RANGE_KEY_DEFAULT");
@@ -96,5 +102,9 @@ public class Constants {
 
     public static String getSheetsAppName() {
         return sheetsAppName;
+    }
+
+    public static String getSheetsCleanupHourRange() {
+        return keys.getOrDefault(SHEETS_CLEANUP_HOUR_RANGE_KEY, SHEETS_CLEANUP_HOUR_RANGE_KEY_DEFAULT);
     }
 }

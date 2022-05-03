@@ -1,23 +1,31 @@
 package controller.actions;
 
 import backend.DataRepositoryInterface;
-import backend.models.Assignment;
+import backend.models.CleanupHour;
 import frontend.SlackInterface;
 import frontend.views.AssignCleanupHourMessageBlocks;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class AssignCleanupHours extends ActionRunner.Action {
+public class AssignCleanupHoursAction extends ActionRunner.Action {
 
-    public AssignCleanupHours() {
+    private final Set<String> selectedHoursNames;
 
+    public AssignCleanupHoursAction(Set<String> selectedHoursNames) {
+        this.selectedHoursNames = selectedHoursNames;
     }
 
     @Override
     protected void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
+        var hours = dataRepository.getCleanupHours().stream().filter(
+                cleanupHour -> selectedHoursNames.contains(cleanupHour.getName())
+        ).collect(Collectors.toList());
+
+
 //        var userId = "US4MRGT09";
-        var userId = "U01LJCXTYSC";
+        var userId = "U02CKAQ8DV2";
 
 //        reaction = event["reaction"]
 //        if reaction == "calendar":
@@ -35,10 +43,12 @@ public class AssignCleanupHours extends ActionRunner.Action {
 //                blocks=blocks,
 //                text="Pick a date for me to remind you"
 //        )
-        var assignmentId = UUID.randomUUID().toString();
-        var assignment = List.of(new Assignment()).get(0);
-        var blocks = AssignCleanupHourMessageBlocks.getBlocks(userId, assignmentId, assignment);
 
-        slackInterface.sendMessage(userId, "You have been assigned a cleanup hour for this week", blocks);
+        for (CleanupHour hour : hours) {
+            var assignmentId = UUID.randomUUID().toString();
+            var blocks = AssignCleanupHourMessageBlocks.getBlocks(userId, assignmentId, hour);
+
+            slackInterface.sendMessage(userId, "You have been assigned a cleanup hour for this week", blocks);
+        }
     }
 }

@@ -4,9 +4,12 @@ import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.socket_mode.SocketModeApp;
 import com.slack.api.model.event.AppHomeOpenedEvent;
+import com.slack.api.model.view.ViewState;
 import controller.CleanupCoordinatorController;
 import util.Constants;
 import util.Log;
+
+import java.util.stream.Collectors;
 
 public class CleanupCoordinator {
 
@@ -51,8 +54,25 @@ public class CleanupCoordinator {
             return ctx.ack();
         });
 
+        app.blockAction("cleanup-assignment-selection-action", (req, ctx) -> {
+            // Do something where
+            return ctx.ack();
+        });
+
+
         app.blockAction("assign_hours_btn", (req, ctx) -> {
-            controller.handleAssignHoursEvent();
+            controller.handleAssignmentSelection(ctx.getTriggerId());
+
+            return ctx.ack();
+        });
+
+
+        app.viewSubmission("assign-cleanup-hours-selection", (req, ctx) -> {
+            var selectedHoursNames = req.getPayload().getView().getState().getValues().get("block").get("action").getSelectedOptions()
+                    .stream().map(ViewState.SelectedOption::getValue).collect(Collectors.toUnmodifiableSet());
+
+            controller.handleAssignHoursEvent(selectedHoursNames);
+
             return ctx.ack();
         });
 

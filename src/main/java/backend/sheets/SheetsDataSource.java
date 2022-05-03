@@ -1,5 +1,6 @@
 package backend.sheets;
 
+import backend.models.CleanupHour;
 import backend.sheets.response.TotalHoursSheetsModel;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface SheetsDataSource {
     List<TotalHoursSheetsModel> getTotalHours();
 
     Map<String, String> getSlackUserToName();
+
+    List<CleanupHour> getCleanupHours();
 }

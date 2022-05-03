@@ -12,7 +12,7 @@ public class FakeDataRepository implements DataRepositoryInterface {
     }
 
     @Override
-    public TotalHoursSheetsModel getCleanupHours(String userId) {
+    public TotalHoursSheetsModel getUsersHourCount(String userId) {
         return null;
     }
 

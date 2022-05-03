@@ -1,5 +1,6 @@
 package backend;
 
+import backend.models.CleanupHour;
 import backend.sheets.CleanupCoordinatorSheetsAPI;
 import backend.sheets.CleanupCoordinatorSheetsDataSource;
 import backend.sheets.response.TotalHoursSheetsModel;
@@ -18,6 +19,7 @@ public class DataRepository implements DataRepositoryInterface {
     private Map<String, String> nameToUserIdMap;
 
     private List<TotalHoursSheetsModel> totalHoursList;
+    private List<CleanupHour> cleanupHours;
 
     public DataRepository() {
         try {
@@ -48,6 +50,7 @@ public class DataRepository implements DataRepositoryInterface {
         userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
         nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         totalHoursList = googleSheetsDataSource.getTotalHours();
+        cleanupHours = googleSheetsDataSource.getCleanupHours();
     }
 
     @Override
@@ -61,7 +64,7 @@ public class DataRepository implements DataRepositoryInterface {
     }
 
     @Override
-    public TotalHoursSheetsModel getCleanupHours(String userId) {
+    public TotalHoursSheetsModel getUsersHourCount(String userId) {
         if (userIdToNameMap.containsKey(userId)) {
             var name = userIdToNameMap.get(userId);
             return totalHoursList.stream()
@@ -72,6 +75,11 @@ public class DataRepository implements DataRepositoryInterface {
             Log.e(String.format("Error getting cleanup hours for %s", userId));
         }
         return TotalHoursSheetsModel.empty();
+    }
+
+    @Override
+    public List<CleanupHour> getCleanupHours() {
+        return cleanupHours;
     }
 
     @Override

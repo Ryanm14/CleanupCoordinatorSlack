@@ -29,7 +29,7 @@ public class AppHomeOpenedAction extends ActionRunner.UserAction {
         if (CleanupCoordinator.isHouseManagerId(userId)) {
             slackInterface.publishView(userId, HouseManagerAppHomeView.getView(userId));
         } else {
-            var totalHoursSheetsModel = dataRepository.getCleanupHours(userId);
+            var totalHoursSheetsModel = dataRepository.getUsersHourCount(userId);
             slackInterface.publishView(userId, UserAppHomeView.getView(totalHoursSheetsModel));
         }
     }

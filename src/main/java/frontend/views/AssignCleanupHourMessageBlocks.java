@@ -1,6 +1,6 @@
 package frontend.views;
 
-import backend.models.Assignment;
+import backend.models.CleanupHour;
 import com.slack.api.model.block.LayoutBlock;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import static com.slack.api.model.block.element.BlockElements.asElements;
 import static com.slack.api.model.block.element.BlockElements.button;
 
 public class AssignCleanupHourMessageBlocks {
-    public static List<LayoutBlock> getBlocks(String userId, String assignmentId, Assignment assignment) {
+    public static List<LayoutBlock> getBlocks(String userId, String assignmentId, CleanupHour assignment) {
         return asBlocks(
                 section(section -> section.text(markdownText(mt -> mt.text(String.format("*Howdy <@%s>! You have been assigned a cleanup hour for this week:*", userId))))),
                 divider(),
@@ -25,7 +25,7 @@ public class AssignCleanupHourMessageBlocks {
                 ));
     }
 
-    private static String getAssignmentMessageText(String assignmentId, Assignment assignment) {
+    private static String getAssignmentMessageText(String assignmentId, CleanupHour assignment) {
         return String.format("*Assignment*: %s\n", assignment.getName()) +
                 String.format("Due Date: %s at %s\n", assignment.getDueDay(), assignment.getDueTime()) +
                 String.format("Worth: %d Hour\n", assignment.getWorth()) +

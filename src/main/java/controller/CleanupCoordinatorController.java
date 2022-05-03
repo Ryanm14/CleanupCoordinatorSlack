@@ -5,8 +5,9 @@ import com.slack.api.app_backend.events.payload.EventsApiPayload;
 import com.slack.api.model.Message;
 import com.slack.api.model.event.MessageEvent;
 import controller.actions.*;
-import controller.actions.AppHomeOpenedAction;
 import frontend.SlackInterface;
+
+import java.util.Set;
 
 public class CleanupCoordinatorController {
 
@@ -25,8 +26,8 @@ public class CleanupCoordinatorController {
         actionRunner.runAction(new AppHomeOpenedAction(userId));
     }
 
-    public void handleAssignHoursEvent() {
-        actionRunner.runAction(new AssignCleanupHours());
+    public void handleAssignHoursEvent(Set<String> selectedHoursNames) {
+        actionRunner.runAction(new AssignCleanupHoursAction(selectedHoursNames));
     }
 
     public void handleReloadSheetsDataEvent() {
@@ -43,5 +44,9 @@ public class CleanupCoordinatorController {
 
     public void handleReloadSheetsKeyEvent() {
         actionRunner.runAction(new ReloadSheetsKeysAction());
+    }
+
+    public void handleAssignmentSelection(String triggerId) {
+        actionRunner.runAction(new AssignCleanupSelectionAction(triggerId));
     }
 }

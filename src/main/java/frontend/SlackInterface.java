@@ -2,6 +2,7 @@ package frontend;
 
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
+import com.slack.api.methods.response.views.ViewsOpenResponse;
 import com.slack.api.model.block.LayoutBlock;
 import com.slack.api.model.view.View;
 import util.Log;
@@ -61,5 +62,23 @@ public class SlackInterface {
         } catch (Exception e) {
             Log.e(String.format("Couldn't update message - error: %s", e.getMessage()), e);
         }
+    }
+
+    public void openView(String triggerId, View view) {
+        try {
+            ViewsOpenResponse viewsOpenRes = client.viewsOpen(r -> r
+                    .token(botToken)
+                    .triggerId(triggerId)
+                    .view(view));
+
+            if (!viewsOpenRes.isOk()) {
+                Log.e(String.format("Couldn't open view - error: %s", viewsOpenRes.getError()));
+            }
+
+        } catch (Exception e) {
+            Log.e(String.format("Couldn't open view - error: %s", e.getMessage()), e);
+        }
+
+
     }
 }

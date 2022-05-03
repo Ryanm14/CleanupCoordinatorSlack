@@ -1,5 +1,6 @@
 package backend.sheets;
 
+import backend.models.CleanupHour;
 import backend.sheets.response.Result;
 import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -17,6 +18,7 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
         this.sheetsAPI = sheetsAPI;
     }
 
+    @Override
     public Map<String, String> getSlackUserToName() {
         Result<ValueRange> response = sheetsAPI.getMembersSheet();
 
@@ -32,6 +34,30 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
         ));
     }
 
+    @Override
+    public List<CleanupHour> getCleanupHours() {
+        Result<ValueRange> response = sheetsAPI.getCleanupHours();
+
+        if (response.isError()) {
+            return List.of();
+        }
+
+        var values = response.getValue().getValues();
+        return values.stream().map(row -> {
+            var name = getStringFromRowSafely(row, 0);
+            var dueDay = getStringFromRowSafely(row, 1);
+            var dueTime = getStringFromRowSafely(row, 2);
+
+            var worthStr = getStringFromRowSafely(row, 3);
+            var worth = Util.parseIntSafely(worthStr);
+
+            var link = getStringFromRowSafely(row, 4);
+
+            return new CleanupHour(name, dueDay, dueTime, worth, link);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public List<TotalHoursSheetsModel> getTotalHours() {
         Result<ValueRange> response = sheetsAPI.getTotalHoursSheet();
 
@@ -54,6 +80,7 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
         }).collect(Collectors.toList());
     }
 
+    @Override
     public Map<String, String> getKeys() {
         Result<ValueRange> response = sheetsAPI.getKeysSheet();
 
