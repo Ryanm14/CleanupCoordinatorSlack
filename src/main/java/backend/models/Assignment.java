@@ -1,22 +1,22 @@
 package backend.models;
 
 public class Assignment {
-    private String userId;
+    private String slackId;
     private String userName;
     private CleanupHour cleanupHour;
 
-    public Assignment(String userId, String userName, CleanupHour cleanupHour) {
-        this.userId = userId;
+    public Assignment(String slackId, String userName, CleanupHour cleanupHour) {
+        this.slackId = slackId;
         this.userName = userName;
         this.cleanupHour = cleanupHour;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getSlackId() {
+        return slackId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setSlackId(String slackId) {
+        this.slackId = slackId;
     }
 
     public String getUserName() {

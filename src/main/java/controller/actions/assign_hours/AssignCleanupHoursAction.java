@@ -1,19 +1,21 @@
-package controller.actions;
+package controller.actions.assign_hours;
 
 import backend.DataRepositoryInterface;
-import backend.models.CleanupHour;
+import backend.models.Assignment;
+import controller.actions.ActionRunner;
 import frontend.SlackInterface;
 import frontend.views.AssignCleanupHourMessageBlocks;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class AssignCleanupHoursAction extends ActionRunner.Action {
 
     private final Set<String> selectedHoursNames;
+    private final CleanupHourAssignmentProcessor cleanupHourAssignmentProcessor;
 
-    public AssignCleanupHoursAction(Set<String> selectedHoursNames) {
+    public AssignCleanupHoursAction(CleanupHourAssignmentProcessor cleanupHourAssignmentProcessor, Set<String> selectedHoursNames) {
+        this.cleanupHourAssignmentProcessor = cleanupHourAssignmentProcessor;
         this.selectedHoursNames = selectedHoursNames;
     }
 
@@ -24,8 +26,8 @@ public class AssignCleanupHoursAction extends ActionRunner.Action {
         ).collect(Collectors.toList());
 
 
-//        var userId = "US4MRGT09";
-        var userId = "U02CKAQ8DV2";
+        var userId = "US4MRGT09";
+//        var userId = "U02CKAQ8DV2";
 
 //        reaction = event["reaction"]
 //        if reaction == "calendar":
@@ -44,11 +46,14 @@ public class AssignCleanupHoursAction extends ActionRunner.Action {
 //                text="Pick a date for me to remind you"
 //        )
 
-        for (CleanupHour hour : hours) {
-            var assignmentId = UUID.randomUUID().toString();
-            var blocks = AssignCleanupHourMessageBlocks.getBlocks(userId, assignmentId, hour);
-
-            slackInterface.sendMessage(userId, "You have been assigned a cleanup hour for this week", blocks);
+        var assignments = cleanupHourAssignmentProcessor.createAssignments(hours, dataRepository.getUserIds());
+        for (Assignment assignment : assignments) {
+            sendAssignment(slackInterface, assignment);
         }
+    }
+
+    private void sendAssignment(SlackInterface slackInterface, Assignment assignment) {
+        var blocks = AssignCleanupHourMessageBlocks.getBlocks(assignment);
+        slackInterface.sendMessage(assignment.getSlackId(), "You have been assigned a cleanup hour for this week", blocks);
     }
 }

@@ -4,42 +4,42 @@ import backend.models.CleanupHour;
 import backend.sheets.response.Result;
 import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import util.Util;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
 
-    private SheetsAPI sheetsAPI;
+    private final SheetsAPI sheetsAPI;
 
     public CleanupCoordinatorSheetsDataSource(SheetsAPI sheetsAPI) {
         this.sheetsAPI = sheetsAPI;
     }
 
     @Override
-    public Map<String, String> getSlackUserToName() {
+    public ImmutableMap<String, String> getSlackUserToName() {
         Result<ValueRange> response = sheetsAPI.getMembersSheet();
 
         if (response.isError()) {
-            return Map.of();
+            return ImmutableMap.of();
         }
 
         var values = response.getValue().getValues();
 
-        return values.stream().collect(Collectors.toMap(
+        return values.stream().collect(ImmutableMap.toImmutableMap(
                 row -> getStringFromRowSafely(row, 1), //Slack User ID
                 row -> getStringFromRowSafely(row, 0) //Name
         ));
     }
 
     @Override
-    public List<CleanupHour> getCleanupHours() {
+    public ImmutableList<CleanupHour> getCleanupHours() {
         Result<ValueRange> response = sheetsAPI.getCleanupHours();
 
         if (response.isError()) {
-            return List.of();
+            return ImmutableList.of();
         }
 
         var values = response.getValue().getValues();
@@ -54,15 +54,15 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
             var link = getStringFromRowSafely(row, 4);
 
             return new CleanupHour(name, dueDay, dueTime, worth, link);
-        }).collect(Collectors.toList());
+        }).collect(ImmutableList.toImmutableList());
     }
 
     @Override
-    public List<TotalHoursSheetsModel> getTotalHours() {
+    public ImmutableList<TotalHoursSheetsModel> getTotalHours() {
         Result<ValueRange> response = sheetsAPI.getTotalHoursSheet();
 
         if (response.isError()) {
-            return List.of();
+            return ImmutableList.of();
         }
 
         var values = response.getValue().getValues();
@@ -77,20 +77,20 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
             var requiredHours = Util.parseIntSafely(requiredHoursStr);
 
             return new TotalHoursSheetsModel(name, completedHours, requiredHours);
-        }).collect(Collectors.toList());
+        }).collect(ImmutableList.toImmutableList());
     }
 
     @Override
-    public Map<String, String> getKeys() {
+    public ImmutableMap<String, String> getKeys() {
         Result<ValueRange> response = sheetsAPI.getKeysSheet();
 
         if (response.isError()) {
-            return Map.of();
+            return ImmutableMap.of();
         }
 
         var values = response.getValue().getValues();
 
-        return values.stream().collect(Collectors.toMap(
+        return values.stream().collect(ImmutableMap.toImmutableMap(
                 row -> getStringFromRowSafely(row, 0), //Key Name
                 row -> getStringFromRowSafely(row, 1) //Key Value
         ));

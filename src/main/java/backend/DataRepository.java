@@ -4,22 +4,22 @@ import backend.models.CleanupHour;
 import backend.sheets.CleanupCoordinatorSheetsAPI;
 import backend.sheets.CleanupCoordinatorSheetsDataSource;
 import backend.sheets.response.TotalHoursSheetsModel;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import util.Constants;
 import util.Log;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DataRepository implements DataRepositoryInterface {
 
     private CleanupCoordinatorSheetsDataSource googleSheetsDataSource;
-    private Map<String, String> userIdToNameMap;
-    private Map<String, String> nameToUserIdMap;
+    private ImmutableMap<String, String> userIdToNameMap;
+    private ImmutableMap<String, String> nameToUserIdMap;
 
-    private List<TotalHoursSheetsModel> totalHoursList;
-    private List<CleanupHour> cleanupHours;
+    private ImmutableList<TotalHoursSheetsModel> totalHoursList;
+    private ImmutableList<CleanupHour> cleanupHours;
 
     public DataRepository() {
         try {
@@ -48,7 +48,7 @@ public class DataRepository implements DataRepositoryInterface {
         }
 
         userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
-        nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getValue, Map.Entry::getKey));
         totalHoursList = googleSheetsDataSource.getTotalHours();
         cleanupHours = googleSheetsDataSource.getCleanupHours();
     }
@@ -78,12 +78,12 @@ public class DataRepository implements DataRepositoryInterface {
     }
 
     @Override
-    public List<CleanupHour> getCleanupHours() {
+    public ImmutableList<CleanupHour> getCleanupHours() {
         return cleanupHours;
     }
 
     @Override
-    public Set<String> getUserIds() {
+    public ImmutableSet<String> getUserIds() {
         return userIdToNameMap.keySet();
     }
 
