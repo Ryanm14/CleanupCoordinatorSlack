@@ -2,7 +2,6 @@ package controller;
 
 import backend.DataRepository;
 import com.slack.api.app_backend.events.payload.EventsApiPayload;
-import com.slack.api.model.Message;
 import com.slack.api.model.event.MessageEvent;
 import controller.actions.*;
 import controller.actions.assign_hours.AssignCleanupHoursAction;
@@ -36,11 +35,11 @@ public class CleanupCoordinatorController {
     }
 
     public void handleReloadSheetsDataEvent() {
-        actionRunner.runAction(new ReloadSheetsDataAction());
+        actionRunner.runAction(new ReloadSheetsDataAction(cleanupHourAssignmentProcessor));
     }
 
-    public void handleAcceptHourEvent(String userId, String assignmentId, Message message) {
-        actionRunner.runAction(new AcceptCleanupHourAction(userId, assignmentId, message));
+    public void handleAcceptHourEvent(String userId, String channelId, String ts) {
+        actionRunner.runAction(new AcceptCleanupHourAction(userId, channelId, ts, cleanupHourAssignmentProcessor));
     }
 
     public void handleSkipHourEvent(String userId, String assignmentId) {

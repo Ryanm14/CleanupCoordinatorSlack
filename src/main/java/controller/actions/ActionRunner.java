@@ -18,10 +18,10 @@ public class ActionRunner {
 
     public abstract static class UserAction extends Action {
 
-        protected final String userId;
+        protected final String slackId;
 
-        public UserAction(String userId) {
-            this.userId = userId;
+        public UserAction(String slackId) {
+            this.slackId = slackId;
         }
     }
 

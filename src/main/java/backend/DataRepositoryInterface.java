@@ -18,5 +18,7 @@ public interface DataRepositoryInterface {
 
     void reloadKeys();
 
-    void setNewAssignedHours(ImmutableList<Assignment> assignments);
+    void saveNewAssignedHours(ImmutableList<Assignment> assignments);
+
+    void updateAssignments(ImmutableList<Assignment> assignments);
 }

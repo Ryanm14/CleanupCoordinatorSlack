@@ -47,9 +47,8 @@ public class AssignCleanupHoursAction extends ActionRunner.Action {
 //                text="Pick a date for me to remind you"
 //        )
 
-        var userIds = dataRepository.getUserIds();
-        var assignments = cleanupHourAssignmentProcessor.createAssignments(hours, userIds);
-        dataRepository.setNewAssignedHours(assignments);
+        var assignments = cleanupHourAssignmentProcessor.createAssignments(hours);
+        dataRepository.saveNewAssignedHours(assignments);
 
         for (Assignment assignment : assignments) {
             sendAssignment(slackInterface, assignment);

@@ -19,4 +19,6 @@ public interface SheetsDataSource {
     List<CleanupHour> getCleanupHours();
 
     void createNewAssignment(ImmutableList<Assignment> assignedHours);
+
+    void updateAssignments(ImmutableList<Assignment> assignments);
 }

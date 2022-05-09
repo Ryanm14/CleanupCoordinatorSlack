@@ -9,4 +9,8 @@ public class Util {
             return -1;
         }
     }
+
+    public static boolean isHouseManagerId(String userId) {
+        return Constants.getHouseManagerIds().contains(userId);
+    }
 }

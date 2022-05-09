@@ -29,11 +29,6 @@ public class CleanupCoordinator {
         Log.setSlackInterface(slackInterface); //Must be before the next one
         controller = new CleanupCoordinatorController(slackInterface);
     }
-
-    public static boolean isHouseManagerId(String userId) {
-        return Constants.getHouseManagerIds().contains(userId);
-    }
-
     public void start() throws Exception {
         socketModeApp.start();
     }
@@ -54,10 +49,7 @@ public class CleanupCoordinator {
             return ctx.ack();
         });
 
-        app.blockAction("cleanup-assignment-selection-action", (req, ctx) -> {
-            // Do something where
-            return ctx.ack();
-        });
+        app.blockAction("cleanup-assignment-selection-action", (req, ctx) -> ctx.ack());
 
 
         app.blockAction("assign_hours_btn", (req, ctx) -> {
@@ -88,9 +80,9 @@ public class CleanupCoordinator {
 
         app.blockAction("accept_hour_btn", (req, ctx) -> {
             var userId = ctx.getRequestUserId();
-            var assignmentId = req.getPayload().getActions().get(0).getValue();
-            var message = req.getPayload().getMessage();
-            controller.handleAcceptHourEvent(userId, assignmentId, message);
+            var channelId = req.getPayload().getChannel().getId();
+            var ts = req.getPayload().getMessage().getTs();
+            controller.handleAcceptHourEvent(userId, channelId, ts);
             return ctx.ack();
         });
 

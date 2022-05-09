@@ -1,48 +1,58 @@
 package controller.actions.assign_hours;
 
+import backend.models.AcceptedStatus;
 import backend.models.Assignment;
 import backend.models.CleanupHour;
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 public class CleanupHourAssignmentProcessor {
 
-    private final List<CleanupHour> cleanupHours;
-    private final List<String> users;
-    private final Set<String> pendingUsers;
-    private final Set<String> acceptedUsers;
-    private final Set<String> skippedUsers;
+    private List<Assignment> currentAssignments;
 
-    public CleanupHourAssignmentProcessor(List<CleanupHour> cleanupHours, List<String> users, Set<String> pendingUsers, Set<String> acceptedUsers, Set<String> skippedUsers) {
-        this.cleanupHours = cleanupHours;
+    private List<CleanupHour> selectedCleanupHours;
+    private List<String> users;
+
+    public CleanupHourAssignmentProcessor(List<CleanupHour> cleanupHours, List<String> users) {
+        this.selectedCleanupHours = cleanupHours;
         this.users = users;
-        this.pendingUsers = pendingUsers;
-        this.acceptedUsers = acceptedUsers;
-        this.skippedUsers = skippedUsers;
+        this.currentAssignments = new ArrayList<>();
     }
 
     public CleanupHourAssignmentProcessor() {
-        this(List.of(), List.of(), Set.of(), Set.of(), Set.of());
+        this(List.of(), List.of());
     }
 
-    public ImmutableList<Assignment> createAssignments(List<CleanupHour> hours, Set<String> userIds) {
-        clear(); //Maybe, i'm not sure yet
+    public ImmutableList<Assignment> createAssignments(List<CleanupHour> selectedCleanupHours) {
+        this.selectedCleanupHours = selectedCleanupHours;
 
         var userId = "US4MRGT09";
-        return hours.stream().limit(1).map(hour -> new Assignment(userId, "Test", hour)).collect(ImmutableList.toImmutableList());
+        currentAssignments = selectedCleanupHours.stream().limit(1).map(hour -> new Assignment(userId, "Test", hour)).collect(ImmutableList.toImmutableList());
+
+        return getAssignments();
     }
 
-    public void userAccepted(String userId) {
-
+    public ImmutableList<Assignment> getAssignments() {
+        return ImmutableList.copyOf(currentAssignments);
     }
 
-    public Assignment userSkippedGetNext(String userId) {
-        return null;
+    public Optional<Assignment> userAccepted(String slackId) {
+        var assignment = currentAssignments.stream()
+                .filter(a -> a.getSlackId().equals(slackId))
+                .findFirst();
+
+        assignment.ifPresent(a -> a.setStatus(AcceptedStatus.ACCEPTED));
+        return assignment;
     }
 
-    private void clear() {
-        //clear data
+//    public Assignment userSkippedGetNext(String userId) {
+//        return null;
+//    }
+
+    public void setUsers(List<String> users) {
+        this.users = users;
     }
 }

@@ -83,7 +83,11 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
 
         currentWeekTab = nextSheetTitle;
         updateCurrentWeekAssignments(assignedHours);
+    }
 
+    @Override
+    public void updateAssignments(ImmutableList<Assignment> assignments) {
+        updateCurrentWeekAssignments(assignments);
     }
 
     private void updateCurrentWeekAssignments(ImmutableList<Assignment> assignedHours) {

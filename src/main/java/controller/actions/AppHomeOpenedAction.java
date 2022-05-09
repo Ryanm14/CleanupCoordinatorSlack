@@ -2,11 +2,11 @@ package controller.actions;
 
 import backend.DataRepositoryInterface;
 import com.slack.api.model.view.View;
-import frontend.CleanupCoordinator;
 import frontend.SlackInterface;
 import frontend.views.HouseManagerAppHomeView;
 import frontend.views.UserAppHomeView;
 import util.Log;
+import util.Util;
 
 import static com.slack.api.model.block.Blocks.asBlocks;
 import static com.slack.api.model.block.Blocks.section;
@@ -20,17 +20,17 @@ public class AppHomeOpenedAction extends ActionRunner.UserAction {
 
     @Override
     final protected void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
-        if (isInvalidUserId(dataRepository, userId)) {
-            slackInterface.publishView(userId, getInvalidUserIdView());
-            Log.e(String.format("Unknown User Accessed the Home Screen. userId: %s", userId), null);
+        if (isInvalidUserId(dataRepository, slackId)) {
+            slackInterface.publishView(slackId, getInvalidUserIdView());
+            Log.e(String.format("Unknown User Accessed the Home Screen. userId: %s", slackId), null);
             return;
         }
 
-        if (CleanupCoordinator.isHouseManagerId(userId)) {
-            slackInterface.publishView(userId, HouseManagerAppHomeView.getView(userId));
+        if (Util.isHouseManagerId(slackId)) {
+            slackInterface.publishView(slackId, HouseManagerAppHomeView.getView(slackId));
         } else {
-            var totalHoursSheetsModel = dataRepository.getUsersHourCount(userId);
-            slackInterface.publishView(userId, UserAppHomeView.getView(totalHoursSheetsModel));
+            var totalHoursSheetsModel = dataRepository.getUsersHourCount(slackId);
+            slackInterface.publishView(slackId, UserAppHomeView.getView(totalHoursSheetsModel));
         }
     }
 

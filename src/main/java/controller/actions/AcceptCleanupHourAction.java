@@ -1,29 +1,27 @@
 package controller.actions;
 
 import backend.DataRepositoryInterface;
-import com.slack.api.model.Message;
+import controller.actions.assign_hours.CleanupHourAssignmentProcessor;
 import frontend.SlackInterface;
-
-import static com.slack.api.model.block.Blocks.asBlocks;
-import static com.slack.api.model.block.Blocks.section;
-import static com.slack.api.model.block.composition.BlockCompositions.markdownText;
+import frontend.views.AssignCleanupHourMessageBlocks;
 
 public class AcceptCleanupHourAction extends ActionRunner.UserAction {
 
-    private String assignmentId;
-    private Message message;
+    private final String channelId;
+    private final String ts;
+    private final CleanupHourAssignmentProcessor assignmentProcessor;
 
-    public AcceptCleanupHourAction(String userId, String assignmentId, Message message) {
-        super(userId);
-        this.assignmentId = assignmentId;
-        this.message = message;
+    public AcceptCleanupHourAction(String slackId, String channelId, String ts, CleanupHourAssignmentProcessor assignmentProcessor) {
+        super(slackId);
+        this.assignmentProcessor = assignmentProcessor;
+        this.channelId = channelId;
+        this.ts = ts;
     }
 
     @Override
     protected void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
-        var ts = message.getTs();
-        slackInterface.updateMessage(message.getChannel(), "TEST", asBlocks(
-                section(section -> section.text(markdownText(mt -> mt.text("*HEDITED*"))))
-        ), ts);
+        var assignment = assignmentProcessor.userAccepted(slackId);
+        dataRepository.updateAssignments(assignmentProcessor.getAssignments());
+        assignment.ifPresent(value -> slackInterface.updateMessage(channelId, "You have accepted a cleanup hour!", AssignCleanupHourMessageBlocks.getAcceptedBlocks(value), ts));
     }
 }

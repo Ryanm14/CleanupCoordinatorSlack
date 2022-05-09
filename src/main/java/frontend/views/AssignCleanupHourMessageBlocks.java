@@ -32,4 +32,11 @@ public class AssignCleanupHourMessageBlocks {
                 String.format("Worth: %d Hour\n", cleanupHour.getWorth()) +
                 String.format("Link: %s\n", cleanupHour.getLink());
     }
+
+    public static List<LayoutBlock> getAcceptedBlocks(Assignment assignment) {
+        return asBlocks(
+                section(section -> section.text(markdownText(mt -> mt.text(String.format("*Howdy <@%s>! You have ACCEPTED the cleanup hour:*", assignment.getSlackId()))))),
+                divider(),
+                section(section -> section.text(markdownText(mt -> mt.text(getAssignmentMessageText(assignment.getCleanupHour()))))));
+    }
 }

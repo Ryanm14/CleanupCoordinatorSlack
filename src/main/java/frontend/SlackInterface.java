@@ -25,14 +25,18 @@ public class SlackInterface {
 
     public void sendMessage(String id, String text, List<LayoutBlock> blocks) {
         try {
-            client.chatPostMessage(r -> r
+            var req = client.chatPostMessage(r -> r
                     .token(botToken)
                     .channel(id)
                     .blocks(blocks)
                     .text(text));
+            System.out.println(req);
         } catch (Exception e) {
             Log.e(String.format("Couldn't send message - error: %s", e.getMessage()), e);
         }
+
+//        channel = "D03C0AVS8AG"
+//        ts = "1652120436.497029"
     }
 
     public void sendMessage(String id, List<LayoutBlock> blocks) {
@@ -52,13 +56,16 @@ public class SlackInterface {
 
     public void updateMessage(String id, String text, List<LayoutBlock> blocks, String ts) {
         try {
-            client.chatUpdate(r -> r
+
+            var response = client.chatUpdate(r -> r
                     .token(botToken)
                     .asUser(true)
-                    .channel(id)
+                    .channel("D03C0AVS8AG")
                     .ts(ts)
                     .blocks(blocks)
                     .text(text));
+
+            System.out.println(response);
         } catch (Exception e) {
             Log.e(String.format("Couldn't update message - error: %s", e.getMessage()), e);
         }

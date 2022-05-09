@@ -11,6 +11,6 @@ public class NoBallsAction extends ActionRunner.UserAction {
 
     @Override
     protected void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
-        slackInterface.sendMessage(userId, "All Shaft!");
+        slackInterface.sendMessage(slackId, "All Shaft!");
     }
 }
