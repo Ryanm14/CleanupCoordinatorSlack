@@ -14,7 +14,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
-import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.api.services.sheets.v4.model.*;
 import util.Constants;
 import util.Log;
 
@@ -80,6 +80,70 @@ public class CleanupCoordinatorSheetsAPI implements SheetsAPI {
     @Override
     public Result<ValueRange> getCleanupHours() {
         return getValueRangeFromDataFile(Constants.getSheetsCleanupHourRange());
+    }
+
+    @Override
+    public Result<List<Sheet>> getSheets() {
+        try {
+            Spreadsheet sp = service.spreadsheets().get(Constants.getSheetsDataFileId()).execute();
+
+            if (sp == null) {
+                return Result.error("Error getting values");
+            }
+
+            return Result.ok(sp.getSheets());
+
+        } catch (IOException e) {
+            Log.e(e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<Boolean> createNewSheet(String sheetTitle) {
+        try {
+            var addSheetRequest = new AddSheetRequest();
+            var sheetProperties = new SheetProperties();
+            sheetProperties.setTitle(sheetTitle);
+            addSheetRequest.setProperties(sheetProperties);
+
+            var batchUpdateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest();
+            batchUpdateSpreadsheetRequest.setRequests(Collections.singletonList(new Request().setAddSheet(addSheetRequest)));
+            var batchUpdateRequest = service.spreadsheets().batchUpdate(Constants.getSheetsDataFileId(), batchUpdateSpreadsheetRequest).execute();
+
+            if (batchUpdateRequest == null) {
+                return Result.error("Error creating new tab");
+            }
+
+            return Result.ok(true);
+        } catch (Exception e) {
+            Log.e(e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<ValueRange> getAssignments(String range) {
+        return getSheetValueRange(Constants.getSheetsDataFileId(), range);
+    }
+
+    @Override
+    public Result<Boolean> updateValueRange(String range, ValueRange body) {
+        try {
+            UpdateValuesResponse result =
+                    service.spreadsheets().values().update(Constants.getSheetsDataFileId(), range, body)
+                            .setValueInputOption("USER_ENTERED")
+                            .execute();
+
+            if (result == null) {
+                return Result.error("Error getting values");
+            }
+
+            return Result.ok(true);
+        } catch (Exception e) {
+            Log.e(e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
     }
 
     private Result<ValueRange> getValueRangeFromDataFile(String range) {

@@ -26,7 +26,8 @@ public class AssignCleanupHoursAction extends ActionRunner.Action {
         ).collect(Collectors.toList());
 
 
-        var userId = "US4MRGT09";
+//        var userId = "US4MRGT09";
+        var userId = "U0198GBP91A";
 //        var userId = "U02CKAQ8DV2";
 
 //        reaction = event["reaction"]
@@ -46,7 +47,10 @@ public class AssignCleanupHoursAction extends ActionRunner.Action {
 //                text="Pick a date for me to remind you"
 //        )
 
-        var assignments = cleanupHourAssignmentProcessor.createAssignments(hours, dataRepository.getUserIds());
+        var userIds = dataRepository.getUserIds();
+        var assignments = cleanupHourAssignmentProcessor.createAssignments(hours, userIds);
+        dataRepository.setNewAssignedHours(assignments);
+
         for (Assignment assignment : assignments) {
             sendAssignment(slackInterface, assignment);
         }

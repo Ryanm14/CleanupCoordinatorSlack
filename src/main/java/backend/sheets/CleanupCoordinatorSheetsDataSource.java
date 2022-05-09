@@ -1,21 +1,30 @@
 package backend.sheets;
 
+import backend.models.Assignment;
 import backend.models.CleanupHour;
 import backend.sheets.response.Result;
 import backend.sheets.response.TotalHoursSheetsModel;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
+import org.jetbrains.annotations.NotNull;
+import util.Log;
 import util.Util;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
-
+    private static final List<Object> ASSIGNMENT_HEADER = ImmutableList.of("Status", "Name", "Hour", "Due Day", "Due Time", "Worth");
     private final SheetsAPI sheetsAPI;
+    private String currentWeekTab;
 
     public CleanupCoordinatorSheetsDataSource(SheetsAPI sheetsAPI) {
         this.sheetsAPI = sheetsAPI;
+        this.currentWeekTab = "";
     }
 
     @Override
@@ -55,6 +64,81 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
 
             return new CleanupHour(name, dueDay, dueTime, worth, link);
         }).collect(ImmutableList.toImmutableList());
+    }
+
+    @Override
+    public void createNewAssignment(ImmutableList<Assignment> assignedHours) {
+        var sheets = sheetsAPI.getSheets();
+        if (sheets.isError()) {
+            Log.e("Couldn't get Sheet Tabs");
+            return;
+        }
+
+        String nextSheetTitle = getNextSheetTitle(sheets);
+        var result = sheetsAPI.createNewSheet(nextSheetTitle);
+        if (result.isError()) {
+            Log.e("Couldn't create new sheet Tab");
+            return;
+        }
+
+        currentWeekTab = nextSheetTitle;
+        updateCurrentWeekAssignments(assignedHours);
+
+    }
+
+    private void updateCurrentWeekAssignments(ImmutableList<Assignment> assignedHours) {
+        var values = convertAssignmentsToRows(assignedHours);
+        values.add(0, ASSIGNMENT_HEADER);
+
+        ValueRange body = new ValueRange().setValues(values);
+
+        //TODO ADD SKIPPERS LIST
+
+        var range = String.format("%s!A1:G", currentWeekTab);
+        var result = sheetsAPI.updateValueRange(range, body);
+        if (result.isError()) {
+            Log.e("Error updating values");
+        }
+
+    }
+
+    private List<List<Object>> convertAssignmentsToRows(ImmutableList<Assignment> assignedHours) {
+        return assignedHours.stream()
+                .sorted()
+                .map(assignment -> List.of(
+                        (Object) assignment.getStatus().toString(),
+                        assignment.getName(),
+                        assignment.getCleanupHour().getName(),
+                        assignment.getCleanupHour().getDueDay(),
+                        assignment.getCleanupHour().getDueTime(),
+                        assignment.getCleanupHour().getWorth()
+
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private List<Assignment> getCurrentAssignments() {
+        return null;
+    }
+
+    @NotNull
+    private String getNextSheetTitle(Result<List<Sheet>> sheets) {
+        var nextSheetNumber = getLastWeeklySheetNumber(sheets).orElse(0) + 1;
+        return "Week " + nextSheetNumber;
+    }
+
+    @NotNull
+    public Optional<Integer> getLastWeeklySheetNumber(Result<List<Sheet>> sheets) {
+        return Streams.findLast(sheets.getValue().stream()
+                .map(this::getTitleFromSheet)
+                .filter(title -> title.startsWith("Week"))
+                .map(title -> Util.parseIntSafely(title.split(" ")[1]))
+                .sorted());
+    }
+
+    private String getTitleFromSheet(Sheet sheet) {
+        SheetProperties properties = (SheetProperties) sheet.get("properties");
+        return properties.getOrDefault("title", "").toString();
     }
 
     @Override

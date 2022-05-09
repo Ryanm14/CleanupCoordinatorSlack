@@ -2,10 +2,10 @@ package controller.actions.assign_hours;
 
 import backend.models.Assignment;
 import backend.models.CleanupHour;
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CleanupHourAssignmentProcessor {
 
@@ -27,11 +27,11 @@ public class CleanupHourAssignmentProcessor {
         this(List.of(), List.of(), Set.of(), Set.of(), Set.of());
     }
 
-    public List<Assignment> createAssignments(List<CleanupHour> hours, Set<String> userIds) {
+    public ImmutableList<Assignment> createAssignments(List<CleanupHour> hours, Set<String> userIds) {
         clear(); //Maybe, i'm not sure yet
 
         var userId = "US4MRGT09";
-        return hours.stream().limit(1).map(hour -> new Assignment(userId, "Test", hour)).collect(Collectors.toList());
+        return hours.stream().limit(1).map(hour -> new Assignment(userId, "Test", hour)).collect(ImmutableList.toImmutableList());
     }
 
     public void userAccepted(String userId) {

@@ -1,6 +1,8 @@
 package backend.models;
 
-public class CleanupHour {
+import org.jetbrains.annotations.NotNull;
+
+public class CleanupHour implements Comparable<CleanupHour> {
     private String name;
     private String dueDay;
     private String dueTime;
@@ -58,5 +60,10 @@ public class CleanupHour {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    @Override
+    public int compareTo(@NotNull CleanupHour o) {
+        return name.compareTo(o.getName());
     }
 }

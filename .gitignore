@@ -199,4 +199,6 @@ fabric.properties
 
 .env
 credentials.json
+*.txt
+/tokens
 

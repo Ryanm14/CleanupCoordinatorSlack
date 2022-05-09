@@ -1,5 +1,6 @@
 package backend;
 
+import backend.models.Assignment;
 import backend.models.CleanupHour;
 import backend.sheets.CleanupCoordinatorSheetsAPI;
 import backend.sheets.CleanupCoordinatorSheetsDataSource;
@@ -10,6 +11,8 @@ import com.google.common.collect.ImmutableSet;
 import util.Constants;
 import util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class DataRepository implements DataRepositoryInterface {
@@ -20,6 +23,7 @@ public class DataRepository implements DataRepositoryInterface {
 
     private ImmutableList<TotalHoursSheetsModel> totalHoursList;
     private ImmutableList<CleanupHour> cleanupHours;
+    private List<Assignment> assignedHours;
 
     public DataRepository() {
         try {
@@ -90,6 +94,12 @@ public class DataRepository implements DataRepositoryInterface {
     @Override
     public void reloadKeys() {
         reloadKeysFromSheets();
+    }
+
+    @Override
+    public void setNewAssignedHours(ImmutableList<Assignment> assignedHours) {
+        this.assignedHours = new ArrayList(assignedHours);
+        googleSheetsDataSource.createNewAssignment(assignedHours);
     }
 
     private void logGoogleSheetsNullError() {

@@ -1,14 +1,19 @@
 package backend.models;
 
-public class Assignment {
+import org.jetbrains.annotations.NotNull;
+
+public class Assignment implements Comparable<Assignment> {
     private String slackId;
-    private String userName;
+    private String name;
     private CleanupHour cleanupHour;
 
-    public Assignment(String slackId, String userName, CleanupHour cleanupHour) {
+    private AcceptedStatus status;
+
+    public Assignment(String slackId, String name, CleanupHour cleanupHour) {
         this.slackId = slackId;
-        this.userName = userName;
+        this.name = name;
         this.cleanupHour = cleanupHour;
+        this.status = AcceptedStatus.PENDING;
     }
 
     public String getSlackId() {
@@ -19,12 +24,12 @@ public class Assignment {
         this.slackId = slackId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getName() {
+        return name;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public CleanupHour getCleanupHour() {
@@ -33,5 +38,18 @@ public class Assignment {
 
     public void setCleanupHour(CleanupHour cleanupHour) {
         this.cleanupHour = cleanupHour;
+    }
+
+    public AcceptedStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AcceptedStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public int compareTo(@NotNull Assignment o) {
+        return cleanupHour.compareTo(o.getCleanupHour());
     }
 }
