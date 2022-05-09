@@ -4,6 +4,7 @@ import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.socket_mode.SocketModeApp;
 import com.slack.api.model.event.AppHomeOpenedEvent;
+import com.slack.api.model.event.MessageChangedEvent;
 import com.slack.api.model.view.ViewState;
 import controller.CleanupCoordinatorController;
 import util.Constants;
@@ -85,6 +86,8 @@ public class CleanupCoordinator {
             controller.handleAcceptHourEvent(userId, channelId, ts);
             return ctx.ack();
         });
+
+        app.event(MessageChangedEvent.class, (payload, ctx) -> ctx.ack());
 
         app.blockAction("skip_hour_btn", (req, ctx) -> {
             var userId = ctx.getRequestUserId();

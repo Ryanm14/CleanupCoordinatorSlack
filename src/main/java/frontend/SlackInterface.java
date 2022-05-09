@@ -56,7 +56,6 @@ public class SlackInterface {
 
     public void updateMessage(String id, String text, List<LayoutBlock> blocks, String ts) {
         try {
-
             var response = client.chatUpdate(r -> r
                     .token(botToken)
                     .asUser(true)
@@ -65,7 +64,6 @@ public class SlackInterface {
                     .blocks(blocks)
                     .text(text));
 
-            System.out.println(response);
         } catch (Exception e) {
             Log.e(String.format("Couldn't update message - error: %s", e.getMessage()), e);
         }
@@ -87,5 +85,19 @@ public class SlackInterface {
         }
 
 
+    }
+
+    public void scheduleMessage(String channelId, String text, int epochTime) {
+        try {
+            client.chatScheduleMessage(r -> r
+                    .token(botToken)
+                    .channel(channelId)
+                    .text(text)
+                    .postAt(epochTime)
+            );
+
+        } catch (Exception e) {
+            Log.e(String.format("Couldn't update message - error: %s", e.getMessage()), e);
+        }
     }
 }
