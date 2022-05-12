@@ -56,10 +56,10 @@ public class SlackInterface {
 
     public void updateMessage(String id, String text, List<LayoutBlock> blocks, String ts) {
         try {
-            var response = client.chatUpdate(r -> r
+            client.chatUpdate(r -> r
                     .token(botToken)
                     .asUser(true)
-                    .channel("D03C0AVS8AG")
+                    .channel(id)
                     .ts(ts)
                     .blocks(blocks)
                     .text(text));

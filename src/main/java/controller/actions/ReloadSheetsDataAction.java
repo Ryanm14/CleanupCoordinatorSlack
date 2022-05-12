@@ -4,8 +4,6 @@ import backend.DataRepositoryInterface;
 import controller.actions.assign_hours.CleanupHourAssignmentProcessor;
 import frontend.SlackInterface;
 
-import java.util.ArrayList;
-
 public class ReloadSheetsDataAction extends ActionRunner.Action {
     private final CleanupHourAssignmentProcessor cleanupHourAssignmentProcessor;
 
@@ -16,8 +14,9 @@ public class ReloadSheetsDataAction extends ActionRunner.Action {
     @Override
     protected void run(DataRepositoryInterface dataRepository, SlackInterface slackInterface) {
         dataRepository.reloadData();
-        var users = dataRepository.getUserIds();
 
-        cleanupHourAssignmentProcessor.setUsers(new ArrayList<>(users));
+        var members = dataRepository.getMembers();
+
+        cleanupHourAssignmentProcessor.setMembers(members);
     }
 }

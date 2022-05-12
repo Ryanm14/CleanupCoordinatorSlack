@@ -1,8 +1,6 @@
 package backend.models;
 
-import org.jetbrains.annotations.NotNull;
-
-public class CleanupHour implements Comparable<CleanupHour> {
+public class CleanupHour {
     private String name;
     private String dueDay;
     private String dueTime;
@@ -10,12 +8,18 @@ public class CleanupHour implements Comparable<CleanupHour> {
     private int worth;
     private String link;
 
-    public CleanupHour(String name, String dueDay, String dueTime, int worth, String link) {
+    private CleanupHourDifficulty difficulty;
+
+    private String bathroomFloor;
+
+    public CleanupHour(String name, String dueDay, String dueTime, int worth, String link, CleanupHourDifficulty difficulty, String bathroomFloor) {
         this.name = name;
         this.dueDay = dueDay;
         this.dueTime = dueTime;
         this.worth = worth;
         this.link = link;
+        this.difficulty = difficulty;
+        this.bathroomFloor = bathroomFloor;
     }
 
     public CleanupHour() {
@@ -62,8 +66,24 @@ public class CleanupHour implements Comparable<CleanupHour> {
         this.link = link;
     }
 
-    @Override
-    public int compareTo(@NotNull CleanupHour o) {
-        return name.compareTo(o.getName());
+
+    public CleanupHourDifficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(CleanupHourDifficulty difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public String getBathroomFloor() {
+        return bathroomFloor;
+    }
+
+    public void setBathroomFloor(String bathroomFloor) {
+        this.bathroomFloor = bathroomFloor;
+    }
+
+    public boolean isBathroomHour() {
+        return !bathroomFloor.isEmpty();
     }
 }

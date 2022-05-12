@@ -1,8 +1,6 @@
 package backend.models;
 
-import org.jetbrains.annotations.NotNull;
-
-public class Assignment implements Comparable<Assignment> {
+public class Assignment {
     private String slackId;
     private String name;
     private CleanupHour cleanupHour;
@@ -46,10 +44,5 @@ public class Assignment implements Comparable<Assignment> {
 
     public void setStatus(AcceptedStatus status) {
         this.status = status;
-    }
-
-    @Override
-    public int compareTo(@NotNull Assignment o) {
-        return cleanupHour.compareTo(o.getCleanupHour());
     }
 }

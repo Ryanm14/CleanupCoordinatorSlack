@@ -2,7 +2,6 @@ package controller.actions;
 
 import backend.DataRepositoryInterface;
 import backend.models.CleanupHour;
-import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.common.collect.ImmutableList;
 
 import java.util.Set;

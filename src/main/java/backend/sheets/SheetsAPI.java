@@ -10,8 +10,6 @@ public interface SheetsAPI {
 
     Result<ValueRange> getMembersSheet();
 
-    Result<ValueRange> getTotalHoursSheet();
-
     Result<ValueRange> getKeysSheet();
 
     Result<ValueRange> getCleanupHours();

@@ -2,24 +2,20 @@ package backend;
 
 import backend.models.Assignment;
 import backend.models.CleanupHour;
+import backend.models.Member;
 import backend.sheets.CleanupCoordinatorSheetsAPI;
 import backend.sheets.CleanupCoordinatorSheetsDataSource;
-import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import util.Constants;
 import util.Log;
 
-import java.util.Map;
-
 public class DataRepository implements DataRepositoryInterface {
 
     private CleanupCoordinatorSheetsDataSource googleSheetsDataSource;
-    private ImmutableMap<String, String> userIdToNameMap;
-    private ImmutableMap<String, String> nameToUserIdMap;
-
-    private ImmutableList<TotalHoursSheetsModel> totalHoursList;
+    private ImmutableMap<String, Member> slackIdToMemberMap;
+    private ImmutableList<Member> membersList;
     private ImmutableList<CleanupHour> cleanupHours;
 
     public DataRepository() {
@@ -48,9 +44,8 @@ public class DataRepository implements DataRepositoryInterface {
             return;
         }
 
-        userIdToNameMap = googleSheetsDataSource.getSlackUserToName();
-        nameToUserIdMap = userIdToNameMap.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getValue, Map.Entry::getKey));
-        totalHoursList = googleSheetsDataSource.getTotalHours();
+        membersList = googleSheetsDataSource.getMembersList();
+        slackIdToMemberMap = membersList.stream().collect(ImmutableMap.toImmutableMap(Member::getSlackId, member -> member));
         cleanupHours = googleSheetsDataSource.getCleanupHours();
     }
 
@@ -65,17 +60,13 @@ public class DataRepository implements DataRepositoryInterface {
     }
 
     @Override
-    public TotalHoursSheetsModel getUsersHourCount(String userId) {
-        if (userIdToNameMap.containsKey(userId)) {
-            var name = userIdToNameMap.get(userId);
-            return totalHoursList.stream()
-                    .filter(model -> name.equals(model.getName()))
-                    .findFirst()
-                    .orElse(TotalHoursSheetsModel.empty());
+    public Member getMember(String slackId) {
+        if (slackIdToMemberMap.containsKey(slackId)) {
+            return slackIdToMemberMap.get(slackId);
         } else {
-            Log.e(String.format("Error getting cleanup hours for %s", userId));
+            Log.e(String.format("Error getting cleanup hours for %s", slackId));
         }
-        return TotalHoursSheetsModel.empty();
+        return Member.empty();
     }
 
     @Override
@@ -85,7 +76,12 @@ public class DataRepository implements DataRepositoryInterface {
 
     @Override
     public ImmutableSet<String> getUserIds() {
-        return userIdToNameMap.keySet();
+        return slackIdToMemberMap.keySet();
+    }
+
+    @Override
+    public ImmutableList<Member> getMembers() {
+        return membersList;
     }
 
     @Override
@@ -101,6 +97,11 @@ public class DataRepository implements DataRepositoryInterface {
     @Override
     public void updateAssignments(ImmutableList<Assignment> assignments) {
         googleSheetsDataSource.updateAssignments(assignments);
+    }
+
+    @Override
+    public ImmutableMap<String, Assignment> getCurrentAssignments() {
+        return ImmutableMap.of();
     }
 
     private void logGoogleSheetsNullError() {

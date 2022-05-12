@@ -2,8 +2,9 @@ package backend.sheets;
 
 import backend.models.Assignment;
 import backend.models.CleanupHour;
+import backend.models.CleanupHourDifficulty;
+import backend.models.Member;
 import backend.sheets.response.Result;
-import backend.sheets.response.TotalHoursSheetsModel;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -28,19 +29,32 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
     }
 
     @Override
-    public ImmutableMap<String, String> getSlackUserToName() {
+    public ImmutableList<Member> getMembersList() {
         Result<ValueRange> response = sheetsAPI.getMembersSheet();
 
         if (response.isError()) {
-            return ImmutableMap.of();
+            return ImmutableList.of();
         }
 
         var values = response.getValue().getValues();
 
-        return values.stream().collect(ImmutableMap.toImmutableMap(
-                row -> getStringFromRowSafely(row, 1), //Slack User ID
-                row -> getStringFromRowSafely(row, 0) //Name
-        ));
+        return values.stream().map(row -> {
+            var slackId = getStringFromRowSafely(row, 0);
+            var name = getStringFromRowSafely(row, 1);
+
+            var completedHoursStr = getStringFromRowSafely(row, 2);
+            var completedHours = Util.parseIntSafely(completedHoursStr);
+
+            var requiredHoursStr = getStringFromRowSafely(row, 3);
+            var requiredHours = Util.parseIntSafely(requiredHoursStr);
+
+            var semestersStr = getStringFromRowSafely(row, 4);
+            var semesters = Util.parseIntSafely(semestersStr);
+
+            var bathroomHall = getStringFromRowSafely(row, 5);
+
+            return new Member(slackId, name, completedHours, requiredHours, semesters, bathroomHall);
+        }).collect(ImmutableList.toImmutableList());
     }
 
     @Override
@@ -62,7 +76,15 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
 
             var link = getStringFromRowSafely(row, 4);
 
-            return new CleanupHour(name, dueDay, dueTime, worth, link);
+            var difficultyStr = getStringFromRowSafely(row, 5);
+            var difficulty = CleanupHourDifficulty.MEDIUM;
+            if (!difficultyStr.isEmpty()) {
+                difficulty = CleanupHourDifficulty.valueOf(difficultyStr.toUpperCase());
+            }
+
+            var bathroomFloor = getStringFromRowSafely(row, 6);
+
+            return new CleanupHour(name, dueDay, dueTime, worth, link, difficulty, bathroomFloor);
         }).collect(ImmutableList.toImmutableList());
     }
 
@@ -108,7 +130,7 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
 
     private List<List<Object>> convertAssignmentsToRows(ImmutableList<Assignment> assignedHours) {
         return assignedHours.stream()
-                .sorted()
+                .sorted(Comparator.comparing(a -> a.getCleanupHour().getName()))
                 .map(assignment -> List.of(
                         (Object) assignment.getStatus().toString(),
                         assignment.getName(),
@@ -143,29 +165,6 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
     private String getTitleFromSheet(Sheet sheet) {
         SheetProperties properties = (SheetProperties) sheet.get("properties");
         return properties.getOrDefault("title", "").toString();
-    }
-
-    @Override
-    public ImmutableList<TotalHoursSheetsModel> getTotalHours() {
-        Result<ValueRange> response = sheetsAPI.getTotalHoursSheet();
-
-        if (response.isError()) {
-            return ImmutableList.of();
-        }
-
-        var values = response.getValue().getValues();
-
-        return values.stream().map(row -> {
-            var name = getStringFromRowSafely(row, 0);
-
-            var completedHoursStr = getStringFromRowSafely(row, 1);
-            var completedHours = Util.parseIntSafely(completedHoursStr);
-
-            var requiredHoursStr = getStringFromRowSafely(row, 2);
-            var requiredHours = Util.parseIntSafely(requiredHoursStr);
-
-            return new TotalHoursSheetsModel(name, completedHours, requiredHours);
-        }).collect(ImmutableList.toImmutableList());
     }
 
     @Override

@@ -11,15 +11,10 @@ public class Constants {
     private static String SHEETS_DATA_FILE_ID_KEY = "";
     private static String HOUSE_MANAGER_KEY = "";
 
-    private static String SHEETS_CLEANUP_HOUR_RANGE_KEY = "";
-    private static String SHEETS_CLEANUP_HOUR_RANGE_DEFAULT = "";
+    private static String SHEETS_CLEANUP_HOURS_RANGE_KEY = "";
+    private static String SHEETS_CLEANUP_HOURS_RANGE_DEFAULT = "";
     private static String SHEETS_MEMBERS_RANGE_KEY = "";
     private static String SHEETS_MEMBERS_RANGE_DEFAULT = "";
-    private static String SHEETS_TOTAL_HOURS_RANGE_KEY = "";
-    private static String SHEETS_TOTAL_HOURS_RANGE_DEFAULT = "";
-
-    private static String REQUIRED_HOURS_KEY = "";
-    private static String REQUIRED_HOURS_DEFAULT = "";
 
     private static String ALLOW_SKIPS_KEY = "";
     private static String ALLOW_SKIPS_DEFAULT = "";
@@ -53,17 +48,11 @@ public class Constants {
 
         HOUSE_MANAGER_KEY = dotenv.get("HOUSE_MANAGER_KEY");
 
-        SHEETS_CLEANUP_HOUR_RANGE_KEY = dotenv.get("SHEETS_CLEANUP_HOUR_RANGE_KEY");
-        SHEETS_CLEANUP_HOUR_RANGE_DEFAULT = dotenv.get("SHEETS_CLEANUP_HOUR_RANGE_DEFAULT");
+        SHEETS_CLEANUP_HOURS_RANGE_KEY = dotenv.get("SHEETS_CLEANUP_HOURS_RANGE_KEY");
+        SHEETS_CLEANUP_HOURS_RANGE_DEFAULT = dotenv.get("SHEETS_CLEANUP_HOURS_RANGE_DEFAULT");
 
         SHEETS_MEMBERS_RANGE_KEY = dotenv.get("SHEETS_MEMBERS_RANGE_KEY");
         SHEETS_MEMBERS_RANGE_DEFAULT = dotenv.get("SHEETS_MEMBERS_RANGE_DEFAULT");
-
-        SHEETS_TOTAL_HOURS_RANGE_KEY = dotenv.get("SHEETS_TOTAL_HOURS_RANGE_KEY");
-        SHEETS_TOTAL_HOURS_RANGE_DEFAULT = dotenv.get("SHEETS_TOTAL_HOURS_RANGE_DEFAULT");
-
-        REQUIRED_HOURS_KEY = dotenv.get("REQUIRED_HOURS_KEY");
-        REQUIRED_HOURS_DEFAULT = dotenv.get("REQUIRED_HOURS_DEFAULT");
 
         ALLOW_SKIPS_KEY = dotenv.get("ALLOW_SKIPS_KEY");
         ALLOW_SKIPS_DEFAULT = dotenv.get("ALLOW_SKIPS_DEFAULT");
@@ -92,14 +81,6 @@ public class Constants {
         return settings.getOrDefault(SHEETS_MEMBERS_RANGE_KEY, SHEETS_MEMBERS_RANGE_DEFAULT);
     }
 
-    public static String getSheetsTotalHoursRange() {
-        return settings.getOrDefault(SHEETS_TOTAL_HOURS_RANGE_KEY, SHEETS_TOTAL_HOURS_RANGE_DEFAULT);
-    }
-
-    public static String getNumberOfRequiredHours() {
-        return settings.getOrDefault(REQUIRED_HOURS_KEY, REQUIRED_HOURS_DEFAULT);
-    }
-
     public static String areSkipsAllowed() {
         return settings.getOrDefault(ALLOW_SKIPS_KEY, ALLOW_SKIPS_DEFAULT);
     }
@@ -125,6 +106,6 @@ public class Constants {
     }
 
     public static String getSheetsCleanupHourRange() {
-        return settings.getOrDefault(SHEETS_CLEANUP_HOUR_RANGE_KEY, SHEETS_CLEANUP_HOUR_RANGE_DEFAULT);
+        return settings.getOrDefault(SHEETS_CLEANUP_HOURS_RANGE_KEY, SHEETS_CLEANUP_HOURS_RANGE_DEFAULT);
     }
 }

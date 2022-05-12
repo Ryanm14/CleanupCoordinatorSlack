@@ -68,11 +68,6 @@ public class CleanupCoordinatorSheetsAPI implements SheetsAPI {
     }
 
     @Override
-    public Result<ValueRange> getTotalHoursSheet() {
-        return getValueRangeFromDataFile(Constants.getSheetsTotalHoursRange());
-    }
-
-    @Override
     public Result<ValueRange> getKeysSheet() {
         return getValueRangeFromKeyFile(Constants.getSheetsKeyRange());
     }

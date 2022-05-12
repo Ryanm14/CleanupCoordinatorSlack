@@ -29,8 +29,8 @@ public class AppHomeOpenedAction extends ActionRunner.UserAction {
         if (Util.isHouseManagerId(slackId)) {
             slackInterface.publishView(slackId, HouseManagerAppHomeView.getView(slackId));
         } else {
-            var totalHoursSheetsModel = dataRepository.getUsersHourCount(slackId);
-            slackInterface.publishView(slackId, UserAppHomeView.getView(totalHoursSheetsModel));
+            var member = dataRepository.getMember(slackId);
+            slackInterface.publishView(slackId, UserAppHomeView.getView(member));
         }
     }
 

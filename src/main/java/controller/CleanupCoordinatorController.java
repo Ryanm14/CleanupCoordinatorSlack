@@ -17,8 +17,9 @@ public class CleanupCoordinatorController {
     private final CleanupHourAssignmentProcessor cleanupHourAssignmentProcessor;
 
     public CleanupCoordinatorController(SlackInterface slackInterface) {
-        actionRunner = new ActionRunner(new DataRepository(), slackInterface);
-        cleanupHourAssignmentProcessor = new CleanupHourAssignmentProcessor();
+        var dataRepo = new DataRepository();
+        actionRunner = new ActionRunner(dataRepo, slackInterface);
+        cleanupHourAssignmentProcessor = new CleanupHourAssignmentProcessor(dataRepo.getCurrentAssignments(), dataRepo.getMembers());
     }
 
     public void handleNoBallsEvent(EventsApiPayload<MessageEvent> payload) {

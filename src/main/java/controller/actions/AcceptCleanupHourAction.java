@@ -1,13 +1,23 @@
 package controller.actions;
 
 import backend.DataRepositoryInterface;
+import backend.models.CleanupHour;
+import com.google.common.collect.ImmutableList;
 import controller.actions.assign_hours.CleanupHourAssignmentProcessor;
 import frontend.SlackInterface;
 import frontend.views.AssignCleanupHourMessageBlocks;
+import util.Util;
 
-import java.time.Instant;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Locale;
+import java.util.stream.Stream;
 
 public class AcceptCleanupHourAction extends ActionRunner.UserAction {
+
+    private static final int HOURS_REMINDER_BEFORE = 6;
 
     private final String channelId;
     private final String ts;
@@ -25,10 +35,31 @@ public class AcceptCleanupHourAction extends ActionRunner.UserAction {
         var assignment = assignmentProcessor.userAccepted(slackId);
         dataRepository.updateAssignments(assignmentProcessor.getAssignments());
         assignment.ifPresent(value -> {
-            var epochSecond = (int) Instant.now().plusSeconds(30).getEpochSecond();
-
             slackInterface.updateMessage(channelId, "You have accepted a cleanup hour!", AssignCleanupHourMessageBlocks.getAcceptedBlocks(value), ts);
-            slackInterface.scheduleMessage(channelId, String.format("Reminder to complete your cleanup Hour! It is due at %s", value.getCleanupHour().getDueTime()), epochSecond);
+
+            var epochSecondReminderTimes = getReminderTimes(value.getCleanupHour());
+            for (Integer reminderTimeSeconds : epochSecondReminderTimes) {
+                slackInterface.scheduleMessage(channelId, String.format("Reminder to complete your cleanup Hour! It is due today at %s", value.getCleanupHour().getDueTime()), reminderTimeSeconds);
+            }
         });
+    }
+
+    private ImmutableList<Integer> getReminderTimes(CleanupHour cleanupHour) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("en"));
+        var zoneId = ZoneId.of("UTC");
+        var now = LocalDate.from(Instant.now().atZone(zoneId));
+        var timeString = Util.fixTimeString(cleanupHour.getDueTime());
+        var zonedTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("hh:mm a", Locale.US));
+
+        return Stream.of(cleanupHour.getDueDay())
+                .flatMap(hoursStr -> Stream.of(hoursStr.split(",")))
+                .map(String::trim)
+                .map(hourStr -> DayOfWeek.from(formatter.parse(hourStr)))
+                .map(dayOfWeek -> now.with(TemporalAdjusters.next(dayOfWeek)))
+                .map(ld -> ld.atTime(zonedTime.getHour(), zonedTime.getMinute()))
+                .map(ld -> ld.toInstant(ZoneOffset.UTC))
+                .map(instant -> instant.minus(HOURS_REMINDER_BEFORE, ChronoUnit.HOURS))
+                .map(time -> (int) time.getEpochSecond())
+                .collect(ImmutableList.toImmutableList());
     }
 }
