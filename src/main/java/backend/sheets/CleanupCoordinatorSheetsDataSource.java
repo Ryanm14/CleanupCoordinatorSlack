@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
     private static final List<Object> ASSIGNMENT_HEADER = ImmutableList.of("Status", "Name", "Hour", "Due Day", "Due Time", "Worth");
+    private static final List<Object> ASSIGNMENT_FOOTER = ImmutableList.of("!!!!AUTO ASSIGNED HOURS - ADD OTHER ASSIGNMENTS BELOW (OR ELSE IT WILL BE OVERWRITTEN)!!!!");
     private final SheetsAPI sheetsAPI;
     private String currentWeekTab;
 
@@ -115,6 +116,7 @@ public class CleanupCoordinatorSheetsDataSource implements SheetsDataSource {
     private void updateCurrentWeekAssignments(ImmutableList<Assignment> assignedHours) {
         var values = convertAssignmentsToRows(assignedHours);
         values.add(0, ASSIGNMENT_HEADER);
+        values.add(ASSIGNMENT_FOOTER);
 
         ValueRange body = new ValueRange().setValues(values);
 

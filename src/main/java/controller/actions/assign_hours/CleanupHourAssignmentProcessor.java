@@ -9,14 +9,16 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CleanupHourAssignmentProcessor {
 
-    private ImmutableMap<String, Assignment> currentAssignments;
+    private Map<String, Assignment> currentAssignments;
 
     private ImmutableList<CleanupHour> selectedCleanupHours = ImmutableList.of();
     private ImmutableList<Member> members;
@@ -27,6 +29,8 @@ public class CleanupHourAssignmentProcessor {
     }
 
     public ImmutableList<Assignment> createAssignments(ImmutableList<CleanupHour> selectedHours) {
+        currentAssignments = ImmutableMap.of();
+
         selectedCleanupHours = selectedHours.stream()
                 .sorted(Comparator.comparing(CleanupHour::isBathroomHour).reversed().thenComparing(c -> c.getDifficulty().getDifficultyValue()))
                 .collect(ImmutableList.toImmutableList());
@@ -57,13 +61,11 @@ public class CleanupHourAssignmentProcessor {
                     } else {
                         return createAssignment(hour, Member.empty());
                     }
-
                 })
-                .filter(assignment -> !assignment.getSlackId().isEmpty())
-                .collect(ImmutableMap.toImmutableMap(
+//                .filter(assignment -> !assignment.getSlackId().isEmpty())
+                .collect(Collectors.toMap(
                         Assignment::getSlackId,
-                        assignment -> assignment
-                ));
+                        assignment -> assignment));
 
         return getAssignments();
     }

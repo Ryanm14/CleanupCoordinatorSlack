@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class AcceptCleanupHourAction extends ActionRunner.UserAction {
 
-    private static final int HOURS_REMINDER_BEFORE = 6;
+    private static final int HOURS_REMINDER_BEFORE = 5;
 
     private final String channelId;
     private final String ts;
@@ -58,6 +58,7 @@ public class AcceptCleanupHourAction extends ActionRunner.UserAction {
                 .map(dayOfWeek -> now.with(TemporalAdjusters.next(dayOfWeek)))
                 .map(ld -> ld.atTime(zonedTime.getHour(), zonedTime.getMinute()))
                 .map(ld -> ld.toInstant(ZoneOffset.UTC))
+                .map(instant -> instant.plus(5, ChronoUnit.HOURS)) //Adjust to EST
                 .map(instant -> instant.minus(HOURS_REMINDER_BEFORE, ChronoUnit.HOURS))
                 .map(time -> (int) time.getEpochSecond())
                 .collect(ImmutableList.toImmutableList());

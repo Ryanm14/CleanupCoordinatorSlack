@@ -1,5 +1,7 @@
 package backend.models;
 
+import java.util.UUID;
+
 public class Member {
     private String slackId;
     private String name;
@@ -18,7 +20,7 @@ public class Member {
     }
 
     public static Member empty() {
-        return new Member("", "", 0, 0, 0, "");
+        return new Member(UUID.randomUUID().toString(), "null", 0, 0, 0, "");
     }
 
     public String getSlackId() {
